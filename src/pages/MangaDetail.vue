@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '../baseConfig'
 import { coverURL} from '../mixing/uploadUtil'
-import Rating from '../components/Rating.vue'
+import CommentContainer from '../components/Comment/Container.vue'
 
 interface Comment {
   description: string,
@@ -67,20 +67,8 @@ onMounted( async () => {
             </div>
         </div>
       </div>
-      <div class="row align-items-center" >
-        <div class="col" v-if="manga.comments.length > 0">
-          <div v-for="comment in manga.comments">
-            <Rating 
-            :value="comment.rating" 
-            :description="comment.description"></Rating>
-          </div>
-        </div>
-        <div v-else>
-          Seja o primeira a comentar
-        </div>
-      </div>
+      <CommentContainer :comments="manga.comments"></CommentContainer>
     </template>
-    
     <div v-else>
       <h1>Carregando</h1>
     </div>
