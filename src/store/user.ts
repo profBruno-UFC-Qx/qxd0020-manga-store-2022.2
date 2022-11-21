@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { api } from '../baseConfig'
+import { ApplicationError, getAppError, isApplicationError } from '../mixing/errorMessageMixing'
 
 interface User {
   jwt: string,
@@ -18,7 +19,7 @@ export const userStore = defineStore('user', () => {
   const user = ref<User>({} as User)
   const isAdmin = computed(() => user.value.role === "Admin")
   
-  async function authenticate(identifier: string, password: string) {
+  async function authenticate(identifier: string, password: string): Promise<User | ApplicationError> {
     try {
       const res = await api.post("/auth/local", {
         identifier,
@@ -32,23 +33,28 @@ export const userStore = defineStore('user', () => {
         email: data.user.email,
         role: ""
       }
-      user.value.role = await getRole()
-      return ""
+      const userRole = await getRole()
+      if(isApplicationError(userRole)) throw userRole
+      user.value.role = userRole
+      return user.value
     } catch(error) {
-      console.log("deu zebra")
-      console.log(error.response.data.error.message)
-      return error.response.data.error.message
+      return getAppError(error)
     }
   }
 
-  async function getRole(){
-    const res = await api.get("/users/me", {
-      headers : {
-        Authorization: `Bearer ${user.value.jwt}`
-      },
-    })
-    const { data } = res
-    return data.role.name
+  async function getRole(): Promise<string | ApplicationError>{
+    try {
+      const res = await api.get("/users/me", {
+        headers : {
+          Authorization: `Bearer ${user.value.jwt}`
+        },
+      })
+      const { data } = res
+      return data.role.name
+    } catch(error) {
+      return getAppError(error)
+    }
+
   }
   
  

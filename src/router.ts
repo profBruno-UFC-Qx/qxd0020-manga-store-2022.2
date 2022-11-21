@@ -3,6 +3,7 @@ import Login from './pages/Login.vue'
 import Home from './pages/Home.vue'
 import HomeAdmin from './pages/admin/HomeAdmin.vue'
 import MangaDetail from './pages/MangaDetail.vue'
+import MangaForm from './pages/admin/Manga/Form.vue'
 import Page403 from './pages/Page403.vue'
 import Page404 from './pages/Page404.vue'
 
@@ -15,6 +16,17 @@ const routes = [
   { 
     path: '/mangas/:id', 
     component: MangaDetail, 
+  },
+  { 
+    path: '/mangas/:id/editar', 
+    component: MangaForm,
+    props: true,
+    meta: { requiresAdmin: true }
+  },
+  { 
+    path: '/mangas/novo', 
+    component: MangaForm,
+    meta: { requiresAdmin: true }
   },
   {
     path: '/login',

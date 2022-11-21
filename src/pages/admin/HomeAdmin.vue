@@ -2,6 +2,8 @@
 import { onMounted, ref } from 'vue';
 import { api } from '../../baseConfig'
 import { coverURL} from '../../mixing/uploadUtil'
+import { useMangaStore } from '../../store/manga'
+import { isApplicationError } from '../../mixing/errorMessageMixing'
 
 interface Cover {
   url: string,
@@ -18,6 +20,10 @@ interface Manga {
 }
 
 const mangas = ref<Manga[]>([])
+const mangaStore = useMangaStore()
+
+const alertType = ref('')
+const alertMessage = ref('')
 
 onMounted( async () => {
   const response = await api.get("/mangas", {
@@ -28,9 +34,28 @@ onMounted( async () => {
   })
   mangas.value = response.data.data
 })
+
+
+async function remover(id: number) {
+  console.log(`Deletando manga com id = ${id}`)
+  const result = await mangaStore.remove(id)
+  if (isApplicationError(result)) {
+    alertType.value = "danger"
+    alertMessage.value = `${result.name} - ${result.message}`
+  } else {
+    alertType.value = "success"
+    alertMessage.value = `Manga ${result.title} removido`
+
+    mangas.value = mangas.value.filter(m => m.id !== id)
+  }
+}
 </script>
 
 <template>
+  <div class="alert" :class="'alert-' + alertType" role="alert" v-if="alertType">
+  {{ alertMessage }}
+  </div>
+  <router-link to="/mangas/novo" class="btn btn-primary">Novo</router-link>
   <table class="table table-striped">
     <thead>
       <tr>
@@ -46,8 +71,8 @@ onMounted( async () => {
         <td>{{manga.title}}</td>
         <td><img :src="coverURL(manga.cover.url)" :alt="'capa do manga' + manga.title"/></td>
         <td>
-          <a href="#" class="btn btn-danger">Delete</a>
-          <a href="#" class="btn btn-info">Editar</a>
+          <a href="#" class="btn btn-danger" @click="remover(manga.id)">Delete</a>
+          <router-link :to="'/mangas/' + manga.id + '/editar'" class="btn btn-info">Editar</router-link>
         </td>
       </tr>
     </tbody>

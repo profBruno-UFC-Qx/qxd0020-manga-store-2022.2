@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { userStore } from '../store/user'
 import { useRouter, useRoute } from 'vue-router';
+import { isApplicationError } from '../mixing/errorMessageMixing';
 
 const identifier = ref("")
 const password = ref("")
@@ -18,15 +19,15 @@ async function authenticate(event: InputEvent){
     validated.value = true
     if(identifier.value && password.value) {
         const result = await store.authenticate(identifier.value, password.value)
-        if(result == "") {
+        if(isApplicationError(result)) {
+            validationMessage.value = result.message
+        } else {
             validationMessage.value = ""
             let redirect = "/"
             if(store.isAdmin) {
                 redirect = route.query.redirect ? route.query.redirect as string: "/admin"
             }
             router.push(redirect)
-        } else {
-            validationMessage.value = result
         }
     }
 }

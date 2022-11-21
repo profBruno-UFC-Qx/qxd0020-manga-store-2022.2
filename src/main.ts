@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { router } from './router'
 import { api } from './baseConfig'
-import { userStore, userStore } from './store/user'
+import { userStore } from './store/user'
 import App from './App.vue'
 
 
