@@ -2,19 +2,20 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { router } from './router'
 import { api } from './baseConfig'
-import { userStore } from './store/user'
+import { userStore } from './stores/user'
 import App from './App.vue'
 
 
 api.interceptors.response.use(response => response, error => {
   const { response } = error
-  if (response.status === 403) {
-    router.replace('/forbiden')
-  } else if (response.status === 404) {
-    router.replace('/notfound')
-  } else {
-    return Promise.reject(error)
+  if (response) {
+    if (response.status === 403) {
+      router.replace('/forbiden')
+    } else if (response.status === 404) {
+      router.replace('/notfound')
+    } 
   }
+  return Promise.reject(error)
 });
 
 router.beforeEach((to, from) => {
