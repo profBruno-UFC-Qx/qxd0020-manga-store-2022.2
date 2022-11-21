@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { userStore } from '../store/user'
+import { userStore } from '../stores/user'
 import { useRouter, useRoute } from 'vue-router';
 import { isApplicationError } from '../mixing/errorMessageMixing';
 
@@ -13,7 +13,7 @@ const route = useRoute()
 const validated = ref(false)
 const validationMessage = ref("")
 
-async function authenticate(event: InputEvent){
+async function authenticate(event: MouseEvent){
     event.preventDefault()
     event.stopPropagation()
     validated.value = true

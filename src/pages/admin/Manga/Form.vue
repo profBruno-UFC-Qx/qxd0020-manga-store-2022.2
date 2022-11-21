@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
-import { useMangaStore } from '../../../store/manga'
+import { useMangaStore } from '../../../stores/manga'
 import { isApplicationError } from '../../../mixing/errorMessageMixing'
 import { coverURL } from '../../../mixing/uploadUtil'
 

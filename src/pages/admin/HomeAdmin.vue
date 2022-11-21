@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { api } from '../../baseConfig'
 import { coverURL} from '../../mixing/uploadUtil'
-import { useMangaStore } from '../../store/manga'
+import { useMangaStore } from '../../stores/manga'
 import { isApplicationError } from '../../mixing/errorMessageMixing'
 
 interface Cover {
