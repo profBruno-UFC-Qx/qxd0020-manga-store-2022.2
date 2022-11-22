@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { api } from '../../baseConfig'
-import { coverURL} from '../../mixing/uploadUtil'
+import { ref, onBeforeMount } from 'vue';
+import { coverURL } from '../../mixing/uploadUtil'
 import { useMangaStore } from '../../stores/manga'
 import { isApplicationError } from '../../mixing/errorMessageMixing'
+import PaginationButtons from '../../components/PaginationButtons.vue'
+import { onBeforeRouteUpdate } from 'vue-router'
 
 interface Cover {
   url: string,
@@ -19,22 +20,37 @@ interface Manga {
   number: number
 }
 
+interface Pagination {
+  page: number,
+  pageSize: number,
+  pageCount: number
+  total: number
+}
+
 const mangas = ref<Manga[]>([])
+const pagination = ref<Pagination>({} as Pagination)
 const mangaStore = useMangaStore()
 
 const alertType = ref('')
 const alertMessage = ref('')
 
-onMounted( async () => {
-  const response = await api.get("/mangas", {
-    params: {
-      populate: "cover",
-      "pagination[pageSize]": 24
-    }
-  })
-  mangas.value = response.data.data
+async function loadMangas(page = 1) {
+  const result = await mangaStore.all(page)
+  if (!isApplicationError(result)) {
+    mangas.value = result.mangas
+    pagination.value = result.pagination
+  }
+}
+onBeforeMount(async () => {
+  await loadMangas()
 })
 
+
+onBeforeRouteUpdate(async (to, from) => {
+  if (to.query.page !== from.query.page) {
+    await loadMangas(Number(to.query.page))
+  }
+})
 
 async function remover(id: number) {
   console.log(`Deletando manga com id = ${id}`)
@@ -53,9 +69,10 @@ async function remover(id: number) {
 
 <template>
   <div class="alert" :class="'alert-' + alertType" role="alert" v-if="alertType">
-  {{ alertMessage }}
+    {{ alertMessage }}
   </div>
   <router-link to="/mangas/novo" class="btn btn-primary">Novo</router-link>
+  <PaginationButtons :current="pagination.page" :total="pagination.pageCount"></PaginationButtons>
   <table class="table table-striped">
     <thead>
       <tr>
@@ -67,9 +84,9 @@ async function remover(id: number) {
     </thead>
     <tbody>
       <tr v-for="manga in mangas" :key="manga.id">
-        <td>{{manga.number}}</td>
-        <td>{{manga.title}}</td>
-        <td><img :src="coverURL(manga.cover.url)" :alt="'capa do manga' + manga.title"/></td>
+        <td>{{ manga.number }}</td>
+        <td>{{ manga.title }}</td>
+        <td><img :src="coverURL(manga.cover.url)" :alt="'capa do manga' + manga.title" /></td>
         <td>
           <a href="#" class="btn btn-danger" @click="remover(manga.id)">Delete</a>
           <router-link :to="'/mangas/' + manga.id + '/editar'" class="btn btn-info">Editar</router-link>

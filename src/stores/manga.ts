@@ -18,7 +18,36 @@ interface Manga {
   number: number
 }
 
+interface Pagination {
+  page: number,
+  pageSize: number,
+  pageCount: number
+  total: number
+}
+
+interface MangaCollection {
+  mangas: Manga[]
+  pagination: Pagination
+}
+
+
 export const useMangaStore = defineStore('manga', () => {
+
+
+async function all(page = 1): Promise<MangaCollection | ApplicationError> {
+  try {
+    const { data } = await api.get("/mangas", {
+      params: {
+        populate: "cover",
+        "pagination[page]": page,
+        "pagination[pageSize]": 24
+      }
+    })
+    return { mangas: data.data, pagination: data.meta.pagination}
+  } catch(error) {
+    return getAppError(error)
+  }
+}
 
   async function remove(id: number): Promise<Manga | ApplicationError> {
     const store = userStore()
@@ -73,11 +102,11 @@ export const useMangaStore = defineStore('manga', () => {
           },
         })
       const { data } = res
-      return data.data
+      return get(data.data.id)
     } catch (error) {
       return getAppError(error)
     }
   }
 
-  return { get, remove, update }
+  return { all, get, remove, update }
 })
